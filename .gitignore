@@ -1,0 +1,15 @@
+# Ambiente virtual Python
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Arquivos locais
+.env
