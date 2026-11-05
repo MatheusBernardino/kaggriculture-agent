@@ -1,8 +1,9 @@
 '''
-Dados estáticos da competição Kaggriculture.
+Dados estaticos da competicao Kaggriculture.
 
-Este módulo concentra os dados descritos no README.md(https://www.kaggle.com/competitions/kaggriculture/data), para armazenar e facilitar o acesso aos dados do problema.
-
+Concentra as constantes publicadas no README oficial da competicao
+(https://www.kaggle.com/competitions/kaggriculture/data) e validadas contra
+a engine `kaggle_environments.envs.kaggriculture`.
 '''
 
 # ---------------------------------------------------------------------------
@@ -103,7 +104,7 @@ CROPS = {
         'seed_cost': 80,
         'base_price': 250,
         'first_yield_days': 10,
-        'max_yield_day': 10,
+        'max_yield_day': 12,
         'subsequent_yields': None,
         'max_yield': 6,
         'action_cost': 1,
@@ -421,42 +422,42 @@ BONUS_WINDOWS = {
 # Funções pequenas para facilitar o uso pelo agente
 # ---------------------------------------------------------------------------
 
-def get_crop(name):
+def get_crop(name: str) -> dict:
     '''Retorna os dados de uma cultura pelo nome.'''
     return CROPS[name.upper()]
 
 
-def get_animal(name):
+def get_animal(name: str) -> dict:
     '''Retorna os dados de um animal pelo nome.'''
     return ANIMALS[name.upper()]
 
 
-def get_market(name):
+def get_market(name: str) -> dict:
     '''Retorna os parâmetros de mercado de um produto.'''
     return MARKET_PARAMS[name.upper()]
 
 
-def get_product_base_price(name):
+def get_product_base_price(name: str) -> float:
     '''Retorna o preço-base de um produto.'''
     return MARKET_PARAMS[name.upper()]['base']
 
 
-def production_product(animal):
+def production_product(animal: str) -> str:
     '''Retorna o produto produzido por um animal.'''
     return ANIMALS[animal.upper()]['product']
 
 
-def required_structure(animal):
+def required_structure(animal: str) -> str:
     '''Retorna a estrutura necessária para colocar o animal.'''
     return ANIMALS[animal.upper()]['structure']
 
 
-def crop_seed_cost(crop):
+def crop_seed_cost(crop: str) -> int:
     '''Retorna o custo do seed de uma cultura.'''
     return CROPS[crop.upper()]['seed_cost']
 
 
-def animal_cost(animal):
+def animal_cost(animal: str) -> int:
     '''Retorna o custo de compra de um animal.'''
     return ANIMALS[animal.upper()]['seed_cost']
 

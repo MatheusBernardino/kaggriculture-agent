@@ -1,18 +1,16 @@
 """
-Script de Execução Determinística: Rodar Partida (Kaggriculture)
-DOE Framework - Camada de Execução (E)
+Script de Execucao Deterministica: Rodar Partida (Kaggriculture)
 
-Executa uma partida completa de simulação entre dois agentes, suprime ruídos
-desnecessários do console e exibe um relatório financeiro estruturado.
+Executa uma partida completa de simulacao entre dois agentes, suprime ruidos
+desnecessarios do console e exibe um relatorio financeiro estruturado.
 """
 
-import sys
-import os
 import argparse
-import importlib
 import contextlib
+import importlib
+import os
+import sys
 
-# Garante que o diretório raiz do projeto esteja no sys.path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
@@ -20,7 +18,7 @@ if BASE_DIR not in sys.path:
 
 @contextlib.contextmanager
 def suprimir_saida():
-    """Redireciona stdout e stderr a nível de descritores de arquivo (C/C++ e Python)."""
+    """Redireciona stdout e stderr a nivel de descritores de arquivo (C/C++ e Python)."""
     try:
         null_fd = os.open(os.devnull, os.O_RDWR)
         save_out = os.dup(1)
@@ -36,39 +34,61 @@ def suprimir_saida():
             os.close(save_err)
             os.close(null_fd)
     except Exception:
-        # Fallback se dup2 falhar no ambiente
         yield
 
 
-def carregar_agente(nome_ou_caminho):
-    """Carrega uma função de agente a partir do nome do módulo ou string reservada."""
+ALIASES_AGENTES = {
+    "atual": "src.kaggriculture_agent",
+    "agente": "src.kaggriculture_agent",
+    "kaggriculture_agent": "src.kaggriculture_agent",
+    "v1": "src.baselines.agente_v1",
+    "agente_v1": "src.baselines.agente_v1",
+    "agente1": "src.baselines.agente_v1",
+    "v3": "src.baselines.agente_v3",
+    "agente_v3": "src.baselines.agente_v3",
+    "agente3": "src.baselines.agente_v3",
+    "v4": "src.baselines.agente_v4",
+    "agente_v4": "src.baselines.agente_v4",
+    "agente4": "src.baselines.agente_v4",
+}
+
+
+def carregar_agente(nome_ou_caminho: str):
+    """Carrega uma funcao de agente a partir de alias, nome do modulo ou string reservada."""
     if nome_ou_caminho in ("random", "reaction"):
         return nome_ou_caminho
-    
-    modulo_nome = nome_ou_caminho.replace(".py", "").replace("/", ".").replace("\\", ".")
-    try:
+
+    alvo = ALIASES_AGENTES.get(nome_ou_caminho, nome_ou_caminho)
+    modulo_nome = alvo.replace(".py", "").replace("/", ".").replace("\\", ".")
+
+    tentativas = [modulo_nome]
+    if not modulo_nome.startswith("src."):
+        tentativas.append(f"src.{modulo_nome}")
+        tentativas.append(f"src.baselines.{modulo_nome}")
+
+    mod = None
+    ultimo_erro = None
+    for cand in tentativas:
         try:
-            mod = importlib.import_module(modulo_nome)
-        except ModuleNotFoundError:
-            if not modulo_nome.startswith("src."):
-                mod = importlib.import_module(f"src.{modulo_nome}")
-            else:
-                raise
-        if hasattr(mod, "agent"):
-            return mod.agent
-        elif hasattr(mod, "agente"):
-            return mod.agente
-        else:
-            raise AttributeError(f"O módulo '{modulo_nome}' não possui função 'agent(obs)' ou 'agente(obs)'")
-    except Exception as e:
-        print(f"[ERRO] Falha ao carregar agente '{nome_ou_caminho}': {e}")
+            mod = importlib.import_module(cand)
+            break
+        except ModuleNotFoundError as e:
+            ultimo_erro = e
+
+    if mod is None:
+        print(f"[ERRO] Falha ao carregar agente '{nome_ou_caminho}': {ultimo_erro}")
         sys.exit(1)
 
+    for attr in ("agent", "agente"):
+        if hasattr(mod, attr):
+            return getattr(mod, attr)
 
-def executar_partida(agente1_ref, agente2_ref, passos=720, debug=False):
-    """
-    Executa uma partida única e retorna o dicionário com todas as métricas finais.
-    """
+    print(f"[ERRO] O modulo '{mod.__name__}' nao possui funcao 'agent(obs)' ou 'agente(obs)'")
+    sys.exit(1)
+
+
+def executar_partida(agente1_ref: str, agente2_ref: str, passos: int = 720, debug: bool = False) -> dict:
+    """Executa uma partida unica e retorna o dicionario com todas as metricas finais."""
     with suprimir_saida():
         from kaggle_environments import make
 
@@ -88,7 +108,6 @@ def executar_partida(agente1_ref, agente2_ref, passos=720, debug=False):
     money0 = farm0.get("money", 0)
     money1 = farm1.get("money", 0)
 
-    # Identificar vencedor
     if money0 > money1:
         vencedor = "Agente 1"
         saldo_vencedor = money0 - money1
@@ -99,7 +118,7 @@ def executar_partida(agente1_ref, agente2_ref, passos=720, debug=False):
         vencedor = "Empate"
         saldo_vencedor = 0
 
-    resultado = {
+    return {
         "agente1": agente1_ref,
         "agente2": agente2_ref,
         "passos": passos,
@@ -109,34 +128,32 @@ def executar_partida(agente1_ref, agente2_ref, passos=720, debug=False):
             "money": money0,
             "shed": obs0.get("private", {}).get("shed", {}),
             "seeds": obs0.get("private", {}).get("seeds", {}),
-            "hands": len(farm0.get("hands", []))
+            "hands": len(farm0.get("hands", [])),
         },
         "player1": {
             "money": money1,
             "shed": obs1.get("private", {}).get("shed", {}),
             "seeds": obs1.get("private", {}).get("seeds", {}),
-            "hands": len(farm1.get("hands", []))
+            "hands": len(farm1.get("hands", [])),
         },
         "vencedor": vencedor,
-        "delta": saldo_vencedor
+        "delta": saldo_vencedor,
     }
 
-    return resultado
 
-
-def imprimir_relatorio(resultado):
+def imprimir_relatorio(resultado: dict) -> None:
     """Exibe o resultado da partida formatado em ASCII no terminal."""
     p0 = resultado["player0"]
     p1 = resultado["player1"]
 
     print("\n" + "=" * 65)
-    print("                 RELATÓRIO DE PARTIDA (DOE)")
+    print("                 RELATORIO DE PARTIDA")
     print("=" * 65)
     print(f" Agente 1 (P0): {resultado['agente1']:<20} | Dinheiro Final: ${p0['money']:>10.2f}")
     print(f" Agente 2 (P1): {resultado['agente2']:<20} | Dinheiro Final: ${p1['money']:>10.2f}")
     print("-" * 65)
     print(f" Vencedor: {resultado['vencedor']} (Delta: +${resultado['delta']:.2f})")
-    print(f" Duração: {resultado['passos']} turnos (Dia {resultado['dia_final']}, Hora {resultado['hora_final']})")
+    print(f" Duracao: {resultado['passos']} turnos (Dia {resultado['dia_final']}, Hora {resultado['hora_final']})")
     print("-" * 65)
     print(f" Itens no Celeiro P0 : {sum(p0['shed'].values()):>3} un | Sementes P0 : {sum(p0['seeds'].values()):>3} un")
     print(f" Itens no Celeiro P1 : {sum(p1['shed'].values()):>3} un | Sementes P1 : {sum(p1['seeds'].values()):>3} un")
@@ -145,9 +162,9 @@ def imprimir_relatorio(resultado):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executa uma partida local no Kaggriculture.")
-    parser.add_argument("--agente1", default="agente3", help="Nome do módulo ou script do Agente 1 (default: agente3)")
-    parser.add_argument("--agente2", default="random", help="Nome do módulo ou script do Agente 2 (default: random)")
-    parser.add_argument("--passos", type=int, default=720, help="Total de passos/turnos (default: 720)")
+    parser.add_argument("--agente1", default="atual", help="Agente 1 (default: atual)")
+    parser.add_argument("--agente2", default="random", help="Agente 2 (default: random)")
+    parser.add_argument("--passos", type=int, default=720, help="Total de turnos (default: 720)")
     parser.add_argument("--debug", action="store_true", help="Ativar logs de debug da engine")
 
     args = parser.parse_args()

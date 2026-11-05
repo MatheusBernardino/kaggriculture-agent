@@ -19,7 +19,13 @@ __pycache__/
 .cursor/
 .vscode/
 
+# Documentação legada e diretrizes internas
+docs/
+directives/
+DOE.md
+
 # Resultados volumosos e builds locais
+*.html
 docs/*.html
 submissions/**/*.zip
 submissions/*.zip

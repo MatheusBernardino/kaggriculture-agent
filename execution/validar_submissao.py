@@ -134,7 +134,7 @@ def executar_validacao_completa(arquivo_ou_modulo):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Valida arquivo de agente para submissão no Kaggle.")
-    parser.add_argument("arquivo", nargs="?", default="agente3.py", help="Arquivo ou módulo a ser validado (default: agente3.py)")
+    parser.add_argument("arquivo", nargs="?", default="src/kaggriculture_agent/agente.py", help="Arquivo ou módulo a ser validado (default: src/kaggriculture_agent/agente.py)")
     args = parser.parse_args()
 
     executar_validacao_completa(args.arquivo)

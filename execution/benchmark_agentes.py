@@ -158,9 +158,9 @@ def imprimir_relatorio_benchmark(sumario):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Executa benchmark estatístico entre dois agentes.")
-    parser.add_argument("--agente1", default="agente3", help="Nome do Agente 1 (default: agente3)")
-    parser.add_argument("--agente2", default="agente2", help="Nome do Agente 2 (default: agente2)")
-    parser.add_argument("--partidas", type=int, default=1000, help="Número de partidas da bateria (default: 4)")
+    parser.add_argument("--agente1", default="atual", help="Nome do Agente 1 (default: atual)")
+    parser.add_argument("--agente2", default="v4", help="Nome do Agente 2 (default: v4)")
+    parser.add_argument("--partidas", type=int, default=4, help="Número de partidas da bateria (default: 4)")
     parser.add_argument("--passos", type=int, default=720, help="Passos por partida (default: 720)")
 
     args = parser.parse_args()

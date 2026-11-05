@@ -1,16 +1,15 @@
 """
-Agente Kaggriculture V5 — Front-Running Preditivo de Mercado + Seleção Dinâmica.
+Agente Kaggriculture V4 — Seleção Dinâmica de Culturas + Estratégia de Mercado.
 
-Implementa antecipação tática (Front-Running): monitora as lavouras quase maduras
-do oponente para desovar produtos antes que o rival colha e destrua a cotação de mercado.
+Refatorado para consumir diretamente os dados e parâmetros de `data.py`.
+Nomes de variáveis, métodos e comentários em português, mantendo
+a interface e contratos esperados pela engine do Kaggle.
+
 Ponto de entrada esperado: agent(obs)
 """
 
-try:
-    from data import CROPS, MARKET_PARAMS, get_crop, get_product_base_price, BONUS_WINDOWS
-except ImportError:
-    # Fallback caso seja executado dentro de subpacote
-    from .data import CROPS, MARKET_PARAMS, get_crop, get_product_base_price, BONUS_WINDOWS
+# Baseline congelado: mantido apenas para benchmark contra a versao atual.
+from ..kaggriculture_agent.dados import CROPS, MARKET_PARAMS, get_crop, get_product_base_price, BONUS_WINDOWS
 
 # ============================================================
 # CONSTANTES GERAIS DA FAZENDA
@@ -136,64 +135,18 @@ def escolher_cultura(obs):
 
 
 # ============================================================
-# ESTRATÉGIA DE MERCADO (Venda consciente de preços e Front-Running)
+# ESTRATÉGIA DE MERCADO (Venda consciente de preços)
 # ============================================================
 
-def estimar_risco_dump_rival(obs, jogador):
-    """
-    Identifica quais produtos o rival está prestes a colher em massa.
-    Monitora o tabuleiro público da fazenda do adversário e identifica
-    plantas que atingiram maturação iminente (risco de inundação do mercado).
-    """
-    rival_id = 1 - jogador if len(obs["farms"]) >= 2 else jogador
-    fazenda_rival = obs["farms"][rival_id]
-    
-    contagem_quase_maduras = {}
-    
-    for linha in fazenda_rival["tiles"]:
-        for tile in linha:
-            if isinstance(tile, dict) and tile.get("kind") == "PLANT":
-                cultura = tile.get("crop")
-                rendimento = tile.get("yield_units", 0)
-                
-                # Obtém o limite de maturação da cultura
-                try:
-                    info = get_crop(cultura)
-                    rendimento_alvo = info.get("max_yield_unfertilized", info.get("max_yield", 4)) - 1
-                except Exception:
-                    rendimento_alvo = 3
-
-                # Se a planta do rival já atingiu ou está a 1 passo do máximo, ele pode colher a qualquer turno
-                if rendimento >= max(2, rendimento_alvo):
-                    contagem_quase_maduras[cultura] = contagem_quase_maduras.get(cultura, 0) + 1
-
-    # Risco de crash:
-    # Para MELON (impacto brutal na curva de preço): 1 ou mais plantas maduras já são sinal vermelho!
-    # Para outras culturas (CARROT, WHEAT, etc.): 2 ou mais plantas prontas
-    produtos_em_risco = set()
-    for crop, qtd in contagem_quase_maduras.items():
-        if crop == "MELON" and qtd >= 1:
-            produtos_em_risco.add(crop)
-        elif qtd >= 2:
-            produtos_em_risco.add(crop)
-
-    return produtos_em_risco
-
-
-def obter_acoes_venda(obs, modo_atual):
+def obter_acoes_venda(obs,modo_atual):
     """
     Decide quais produtos e quais quantidades vender no turno atual.
     Evita vender em excesso de uma só vez para não derrubar as curvas de preço.
-    Agora inclui Front-Running preditivo contra o rival!
     """
     celeiro = obs["private"]["shed"]
     precos_mercado = obs.get("market", {}).get("prices", {})
     dia = obs["day"]
-    jogador = obs["player"]
     acoes_venda = []
-
-    # 1. Avaliação de Front-Running contra a colheita iminente do rival
-    produtos_em_risco = estimar_risco_dump_rival(obs, jogador)
 
     for produto, quantidade in celeiro.items():
         if quantidade <= 0:
@@ -208,16 +161,6 @@ def obter_acoes_venda(obs, modo_atual):
             continue
 
         preco_atual = precos_mercado.get(produto, preco_base)
-
-        # FRONT-RUNNING: O rival vai inundar o mercado deste produto nos próximos passos!
-        # Se temos esse produto no celeiro e o preço ainda não colapsou totalmente (>= 40% da base),
-        # vendemos na frente dele antes que ele descarregue e destrua a cotação!
-        if produto in produtos_em_risco and quantidade > 0:
-            if preco_atual >= preco_base * 0.40:
-                quantidade_venda = min(quantidade, 5)
-                acoes_venda.append(["SELL", produto, quantidade_venda])
-                continue
-
         # Regras alteradas pelo Modo da Época
         if modo_atual == "protect":
             # Protege a liderança: não inunda o mercado, vende pouco para manter o preço do rival alto
