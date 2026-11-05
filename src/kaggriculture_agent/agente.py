@@ -129,3 +129,4 @@ def agent(obs: dict) -> Dict[str, list]:
         return {"farmer": acao_fazendeiro, "hands": acoes_ajudantes, "market": acoes_mercado}
 
     return {"farmer": ["PASS"], "hands": acoes_ajudantes, "market": acoes_mercado}
+

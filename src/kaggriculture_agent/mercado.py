@@ -236,3 +236,4 @@ def gerar_acoes_mercado(obs: dict, cultura_escolhida: str | None, modo_atual: st
     acoes.extend(gerar_acoes_compra_sementes(obs, cultura_escolhida))
     acoes.extend(gerar_acoes_venda(obs, modo_atual))
     return acoes[:MAX_ORDENS_MERCADO]
+

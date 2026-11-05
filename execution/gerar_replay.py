@@ -76,3 +76,4 @@ if __name__ == "__main__":
         abrir_navegador=not args.no_browser,
         passos=args.passos,
     )
+

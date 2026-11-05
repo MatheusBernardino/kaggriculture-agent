@@ -8,3 +8,4 @@ from .agente import agent
 from .dados import CROPS, MARKET_PARAMS, PRODUCTS
 
 __all__ = ["agent", "CROPS", "MARKET_PARAMS", "PRODUCTS"]
+

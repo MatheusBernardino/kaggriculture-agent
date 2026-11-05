@@ -107,6 +107,16 @@ python execution/benchmark_agentes.py --agente1 atual --agente2 v4 --partidas 10
 python -m unittest tests/test_tudo.py
 ```
 
+### 6. Compilar e Submeter no Kaggle
+Para submissão, a engine do Kaggle exige um arquivo único `main.py` na raiz contendo a função `agent(obs)`. O script compilador gera e valida esse arquivo autocontido a partir dos módulos em `src/`:
+```bash
+# Compila e valida o main.py autocontido
+python execution/gerar_submissao.py main.py
+
+# Submissão via CLI oficial do Kaggle
+kaggle competitions submit kaggriculture -f main.py -m "Agente V6 Modular Autocontido"
+```
+
 ---
 
 ## 📊 Histórico e Comparativo de Versões
@@ -117,3 +127,4 @@ python -m unittest tests/test_tudo.py
 | **V3** | Épocas + Multi-Crop | Modos Macro + Seleção de culturas | Média |
 | **V4** | Front-Running | Monitoramento do rival + Venda preditiva | Média (bug de modo) |
 | **V6 (Atual)** | Arquitetura Modular | Modularização completa + Correção de liquidação + Testes | **0 itens** |
+
