@@ -22,6 +22,7 @@ O agente foi refatorado a partir dos experimentos iniciais para um pacote modula
 
 ```text
 kaggriculture-agent/
+├── main.py                       # Arquivo de submissão autocontido para o Kaggle (gerado)
 ├── src/
 │   ├── kaggriculture_agent/       # Pacote oficial da versão atual
 │   │   ├── __init__.py           # Exporta agent(obs)
@@ -38,6 +39,7 @@ kaggriculture-agent/
 │       ├── agente_v3.py          # V3: introdução de épocas e ajudantes
 │       └── agente_v4.py          # V4: introdução de front-running de mercado
 ├── execution/                    # Scripts determinísticos de execução
+│   ├── gerar_submissao.py        # Compilador que gera e valida o main.py autocontido
 │   ├── rodar_partida.py          # Executa 1 partida com relatório no console
 │   ├── gerar_replay.py           # Renderiza replay visual interativo em HTML
 │   ├── benchmark_agentes.py      # Bateria de partidas com alternância de lados
