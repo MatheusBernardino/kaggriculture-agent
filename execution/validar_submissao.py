@@ -16,6 +16,8 @@ import argparse
 import importlib
 
 # Garante que o diretório raiz do projeto esteja no sys.path
+from typing import List, Tuple
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
@@ -23,7 +25,7 @@ if BASE_DIR not in sys.path:
 from execution.rodar_partida import suprimir_saida, carregar_agente
 
 
-def validar_arquivo_estatico(caminho_arquivo):
+def validar_arquivo_estatico(caminho_arquivo: str) -> Tuple[bool, List[str], List[str]]:
     """Executa verificações estáticas no código fonte do agente."""
     erros = []
     avisos = []
@@ -58,7 +60,7 @@ def validar_arquivo_estatico(caminho_arquivo):
     return len(erros) == 0, erros, avisos
 
 
-def validar_execucao_dinamica(nome_agente, passos_teste=10):
+def validar_execucao_dinamica(nome_agente: str, passos_teste: int = 10) -> Tuple[bool, str]:
     """Executa uma rodada rápida de smoke test no ambiente do Kaggle."""
     try:
         with suprimir_saida():
@@ -78,7 +80,7 @@ def validar_execucao_dinamica(nome_agente, passos_teste=10):
         return False, f"Exceção durante a execução dinâmica: {e}"
 
 
-def executar_validacao_completa(arquivo_ou_modulo):
+def executar_validacao_completa(arquivo_ou_modulo: str) -> bool:
     """Orquestra a validação estática e dinâmica completa."""
     caminho = arquivo_ou_modulo
     if not caminho.endswith(".py") and os.path.exists(f"{caminho}.py"):

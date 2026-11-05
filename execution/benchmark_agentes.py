@@ -14,6 +14,8 @@ import json
 import statistics
 from datetime import datetime
 
+from typing import Any, Dict
+
 # Garante que o diretório raiz do projeto esteja no sys.path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
@@ -22,7 +24,13 @@ if BASE_DIR not in sys.path:
 from execution.rodar_partida import executar_partida
 
 
-def executar_benchmark(agente1_ref, agente2_ref, num_partidas=10, passos=720, salvar_json=True):
+def executar_benchmark(
+    agente1_ref: str,
+    agente2_ref: str,
+    num_partidas: int = 4,
+    passos: int = 720,
+    salvar_json: bool = True,
+) -> Dict[str, Any]:
     """
     Executa N partidas com alternância de lados e calcula estatísticas consolidadas.
     """
@@ -130,7 +138,7 @@ def executar_benchmark(agente1_ref, agente2_ref, num_partidas=10, passos=720, sa
     return sumario
 
 
-def imprimir_relatorio_benchmark(sumario):
+def imprimir_relatorio_benchmark(sumario: Dict[str, Any]) -> None:
     """Formata e imprime as métricas consolidadas."""
     print("\n" + "=" * 68)
     print("                 RESULTADO CONSOLIDADO DO BENCHMARK")

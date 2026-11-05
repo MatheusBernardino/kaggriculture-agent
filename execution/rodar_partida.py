@@ -11,13 +11,15 @@ import importlib
 import os
 import sys
 
+from typing import Any, Callable, Dict, Iterator
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 
 @contextlib.contextmanager
-def suprimir_saida():
+def suprimir_saida() -> Iterator[None]:
     """Redireciona stdout e stderr a nivel de descritores de arquivo (C/C++ e Python)."""
     try:
         null_fd = os.open(os.devnull, os.O_RDWR)
@@ -53,7 +55,7 @@ ALIASES_AGENTES = {
 }
 
 
-def carregar_agente(nome_ou_caminho: str):
+def carregar_agente(nome_ou_caminho: str) -> Any:
     """Carrega uma funcao de agente a partir de alias, nome do modulo ou string reservada."""
     if nome_ou_caminho in ("random", "reaction"):
         return nome_ou_caminho
